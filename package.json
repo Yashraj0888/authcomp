@@ -1,0 +1,54 @@
+{
+  "name": "authcomp",
+  "version": "1.3.0",
+  "description": "A customizable Next.js social authentication UI component with Tailwind CSS styling",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "next-auth-social-ui": "./bin/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "dev": "next dev",
+    "start": "next start"
+  },
+  "keywords": [
+    "next-auth",
+    "authentication",
+    "social-login",
+    "react",
+    "tailwindcss",
+    "typescript"
+  ],
+  "dependencies": {
+    "next": "^14.0.0",
+    "next-auth": "^4.24.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.12.0"
+  },
+  "peerDependencies": {
+    "next": ">=13.0.0",
+    "next-auth": ">=4.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "react-icons": ">=4.0.0",
+    "tailwindcss": ">=3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "author": "",
+  "license": "MIT"
+}
