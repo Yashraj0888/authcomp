@@ -131,6 +131,18 @@ GITHUB_SECRET=your-github-client-secret
 LINKEDIN_CLIENT_ID=your-linkedin-client-id
 LINKEDIN_CLIENT_SECRET=your-linkedin-client-secret`;
 
+async function installPackage(packageName) {
+  try {
+    console.log(`\x1b[33mInstalling ${packageName}...\x1b[0m`);
+    execSync(`npm install ${packageName}`, { stdio: 'inherit' });
+    console.log(`\x1b[32m✓ Successfully installed ${packageName}\x1b[0m`);
+    return true;
+  } catch (error) {
+    console.error(`\x1b[31mError installing ${packageName}:\x1b[0m`, error.message);
+    return false;
+  }
+}
+
 async function setupAuth() {
   try {
     // Create the auth route directory
@@ -155,31 +167,55 @@ async function setupAuth() {
     console.log('1. Update your .env file with your OAuth credentials');
     console.log('2. Add AuthLogin component to your pages:');
     console.log('\x1b[36m%s\x1b[0m', `
-import { AuthLogin } from 'next-auth-social-ui';
+import { AuthLogin } from 'authcomp';
 
 export default function LoginPage() {
   return (
     <AuthLogin 
       callbackUrl="/dashboard"
-      // Customize with additional props as needed
+      // Additional customization props
+      title="Welcome Back"
+      subtitle="Sign in to continue"
+      showGoogle={true}
+      showGithub={true}
+      showLinkedin={true}
+      buttonClassName="custom-button-class"
+      containerClassName="custom-container-class"
     />
   );
 }`);
-
   } catch (error) {
     console.error('\x1b[31mError setting up authentication:\x1b[0m', error);
     process.exit(1);
   }
 }
 
-console.log('\x1b[36m%s\x1b[0m', 'Next Auth Social UI Setup');
-console.log('This will set up the authentication route and environment variables.');
+// Start with package installations first
+console.log('\x1b[36m%s\x1b[0m', 'Package Installation');
 
-rl.question('Do you want to set up authentication? (y/N) ', (answer) => {
-  if (answer.toLowerCase() === 'y') {
-    setupAuth();
-  } else {
-    console.log('Setup cancelled.');
+// Ask about installing authcomp package
+rl.question('Do you want to install the authcomp package? (y/N) ', async (authcompAnswer) => {
+  if (authcompAnswer.toLowerCase() === 'y') {
+    await installPackage('authcomp');
   }
-  rl.close();
+
+  // Ask about installing navbar package
+  rl.question('Do you want to install the aganitha-nav-bar package? (y/N) ', async (navbarAnswer) => {
+    if (navbarAnswer.toLowerCase() === 'y') {
+      await installPackage('aganitha-nav-bar');
+    }
+
+    // Now proceed with authentication setup
+    console.log('\n\x1b[36m%s\x1b[0m', 'Next Auth Social UI Setup');
+    console.log('This will set up the authentication route and environment variables.');
+
+    rl.question('Do you want to set up authentication route? (y/N) ', (authAnswer) => {
+      if (authAnswer.toLowerCase() === 'y') {
+        setupAuth();
+      } else {
+        console.log('Authentication setup cancelled.');
+      }
+      rl.close();
+    });
+  });
 });
