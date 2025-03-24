@@ -1,221 +1,180 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
 const readline = require('readline');
 const { execSync } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+const { installDependencies, installPackage } = require('../utils/installUtils');
+const { setupHomePage } = require('../setup/homePage');
+const { setupGlobalCss } = require('../setup/globalCss');
+const { setupAuth } = require('../setup/auth');
+const { setupAuthTemplates } = require('../setup/authTemplates');
+const { setupPublicAssets } = require('../setup/setupPublicAssets');
 
-// Ensure line endings are correct for the current platform
-const EOL = require('os').EOL;
-
+// Create readline interface
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
-const authRouteContent = `import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import GithubProvider from "next-auth/providers/github";
-import LinkedInProvider, { LinkedInProfile } from "next-auth/providers/linkedin";
+// Function to ask a question and get user input
+function askQuestion(question, defaultAnswer = 'y') {
+  const defaultText = defaultAnswer ? ` (${defaultAnswer})` : '';
+  return new Promise((resolve) => {
+    rl.question(`${question}${defaultText}: `, (answer) => {
+      const trimmedAnswer = answer.trim().toLowerCase();
+      resolve(trimmedAnswer || defaultAnswer.toLowerCase());
+    });
+  });
+}
 
-const handler = NextAuth({
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_ID || '',
-      clientSecret: process.env.GOOGLE_SECRET || '',
-    }),
-    GithubProvider({
-      clientId: process.env.GITHUB_ID || '',
-      clientSecret: process.env.GITHUB_SECRET || '',
-    }),
-    LinkedInProvider({
-      clientId: process.env.LINKEDIN_CLIENT_ID || '',
-      clientSecret: process.env.LINKEDIN_CLIENT_SECRET || '',
-      client: { token_endpoint_auth_method: "client_secret_post" },
-      issuer: "https://www.linkedin.com",
-      profile: (profile: LinkedInProfile) => ({
-        id: profile.sub,
-        name: profile.name,
-        email: profile.email,
-        image: profile.picture,
-      }),
-      wellKnown:
-        "https://www.linkedin.com/oauth/.well-known/openid-configuration",
-      authorization: {
-        params: {
-          scope: "openid profile email",
-        },
-      },
-    }),
-  ],
-  pages: {
-    signIn: "/",
-  },
-  callbacks: {
-    async signIn({ user, account, profile }) {
-      if (!account || !profile) {
-        return false;
-      }
-
-      // Add custom profile data to the user object
-      if (profile.email) {
-        user.email = profile.email;
-      }
-
-      if (profile.name) {
-        user.name = profile.name;
-      }
-
-      // Add provider-specific profile data
-      if (account.provider === 'github') {
-        //@ts-expect-error
-        user.githubUrl = profile.html_url;
-      }
-
-      if (account.provider === 'linkedin') {
-        //@ts-expect-error
-        user.linkedinUrl = profile.publicProfileUrl;
-      }
-
-      return true;
-    },
-    async jwt({ token, user, account }) {
-      if (user) {
-        token.userId = user.id;
-        // Add provider-specific URLs if available
-
-        if ('githubUrl' in user) {
-          token.githubUrl = user.githubUrl;
-        }
-        if ('linkedinUrl' in user) {
-          token.linkedinUrl = user.linkedinUrl;
-        }
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token && session.user) {
-        (session.user as any).id = token.userId as string;
-        // Add provider URLs to session if available
-        if (token.githubUrl) {
-          //@ts-expect-error
-          session.user.githubUrl = token.githubUrl;
-        }
-        if (token.linkedinUrl) {
-          //@ts-expect-error
-          session.user.linkedinUrl = token.linkedinUrl;
-        }
-      }
-      return session;
-    },  },
-  session: {
-    strategy: 'jwt',
-    maxAge: 7 * 24 * 60 * 60, // 7 days
-  },
-});
-export { handler as GET, handler as POST };`;
-
-const envContent = `# Authentication
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-secret-key-here
-
-# Google OAuth
-GOOGLE_ID=your-google-client-id
-GOOGLE_SECRET=your-google-client-secret
-
-# GitHub OAuth
-GITHUB_ID=your-github-client-id
-GITHUB_SECRET=your-github-client-secret
-
-# LinkedIn OAuth
-LINKEDIN_CLIENT_ID=your-linkedin-client-id
-LINKEDIN_CLIENT_SECRET=your-linkedin-client-secret`;
-
-async function installPackage(packageName) {
+async function installNextJs() {
+  console.log('\x1b[36m%s\x1b[0m', 'Creating Next.js app...');
   try {
-    console.log(`\x1b[33mInstalling ${packageName}...\x1b[0m`);
-    execSync(`npm install ${packageName}`, { stdio: 'inherit' });
-    console.log(`\x1b[32m✓ Successfully installed ${packageName}\x1b[0m`);
+    // Ask for app name with default
+    const appName = await askQuestion('Enter your app name', 'Aganitha app');
+    const sanitizedAppName = appName.toLowerCase().replace(/\s+/g, '-');
+
+    // Add all default presets to the create-next-app command
+    execSync(`npx create-next-app@latest ${sanitizedAppName} --typescript --tailwind --eslint --app --no-src-dir --turbopack --import-alias="@/*"`, { 
+      stdio: 'inherit',
+      cwd: process.cwd()
+    });
+
+    // Change directory to the newly created app
+    process.chdir(sanitizedAppName);
     return true;
   } catch (error) {
-    console.error(`\x1b[31mError installing ${packageName}:\x1b[0m`, error.message);
+    console.error('\x1b[31mFailed to create Next.js app:\x1b[0m', error);
     return false;
   }
 }
 
-async function setupAuth() {
+async function installAuthComp() {
+  console.log('\x1b[36m%s\x1b[0m', 'Installing authcomp...');
   try {
-    // Create the auth route directory
-    const routePath = path.join(process.cwd(), 'app', 'api', 'auth', '[...nextauth]');
-    fs.mkdirSync(routePath, { recursive: true });
+    // Use installPackage from installUtils
+    const success = await installPackage('authcomp@latest');
+    if (!success) {
+      throw new Error('Failed to install authcomp');
+    }
+    return true;
+  } catch (error) {
+    console.error('\x1b[31mFailed to install authcomp:\x1b[0m', error);
+    return false;
+  }
+}
 
-    // Create the route.ts file
-    fs.writeFileSync(path.join(routePath, 'route.ts'), authRouteContent.replace(/\n/g, EOL));
+async function main() {
+  try {
+    console.log('\x1b[36m%s\x1b[0m', 'Starting Next.js Authentication Component Setup...');
 
-    // Create or append to .env file
-    const envPath = path.join(process.cwd(), '.env');
-    if (!fs.existsSync(envPath)) {
-      fs.writeFileSync(envPath, envContent);
-    } else {
-      fs.appendFileSync(envPath, '\n\n' + envContent);
+    // Step 1: Install Next.js
+    const nextInstalled = await installNextJs();
+    if (!nextInstalled) {
+      console.error('\x1b[31mFailed to create Next.js application\x1b[0m');
+      process.exit(1);
     }
 
-    console.log('\x1b[32m%s\x1b[0m', '✓ Authentication route created successfully!');
-    console.log('\x1b[32m%s\x1b[0m', '✓ Environment variables added to .env file');
-    
-    console.log('\n\x1b[33mNext steps:\x1b[0m');
-    console.log('1. Update your .env file with your OAuth credentials');
-    console.log('2. Add AuthLogin component to your pages:');
-    console.log('\x1b[36m%s\x1b[0m', `
-import { AuthLogin } from 'authcomp';
+    // Install required dependencies
+    await installDependencies();
 
-export default function LoginPage() {
-  return (
-    <AuthLogin 
-      callbackUrl="/dashboard"
-      // Additional customization props
-      title="Welcome Back"
-      subtitle="Sign in to continue"
-      showGoogle={true}
-      showGithub={true}
-      showLinkedin={true}
-      buttonClassName="custom-button-class"
-      containerClassName="custom-container-class"
-    />
-  );
-}`);
+    // Step 2: Ask about authentication system
+    console.log('\x1b[36m%s\x1b[0m', 'Do you want to install the authentication system?');
+    console.log('This will install authcomp and set up authentication routes.');
+    
+    let answer = '';
+    do {
+      answer = await askQuestion('Install authentication? (Y/n)', 'y');
+      // Convert to lowercase and trim
+      answer = answer.toLowerCase().trim();
+    } while (!['y', 'n', 'yes', 'no'].includes(answer));
+
+    const installAuth = (answer === 'y' || answer === 'yes');
+    
+    if (installAuth) {
+      // Step 2.1: Install authcomp
+      console.log('\x1b[36m%s\x1b[0m', 'Installing authentication system...');
+      const authInstalled = await installAuthComp();
+      if (!authInstalled) {
+        console.error('\x1b[31mFailed to install authentication component\x1b[0m');
+        process.exit(1);
+      }
+
+      // Step 2.2: Ask about installing ldapjs
+      console.log('\x1b[36m%s\x1b[0m', 'Do you want to install LDAP authentication support?');
+      const ldapAnswer = await askQuestion('Install LDAP support? (Y/n)', 'y');
+      const installLdap = (ldapAnswer === 'y' || ldapAnswer === 'yes');
+      
+      if (installLdap) {
+        console.log('\x1b[36m%s\x1b[0m', 'Installing LDAP dependencies...');
+        const ldapInstalled = await installPackage('ldapjs');
+        if (!ldapInstalled) {
+          console.error('\x1b[33mWarning: Failed to install ldapjs, but continuing with setup\x1b[0m');
+        } else {
+          console.log('\x1b[32m✓ LDAP dependencies installed successfully!\x1b[0m');
+        }
+      }
+
+      // Step 2.3: Set up auth files and templates
+      const authSetup = await setupAuth();
+      if (!authSetup) {
+        console.error('\x1b[31mFailed to set up authentication\x1b[0m');
+        process.exit(1);
+      }
+
+      const authTemplatesSetup = await setupAuthTemplates();
+      if (!authTemplatesSetup) {
+        console.error('\x1b[31mFailed to set up authentication templates\x1b[0m');
+        process.exit(1);
+      }
+
+      console.log('\x1b[32m%s\x1b[0m', '✓ Authentication system installed successfully!');
+    } else {
+      console.log('\x1b[33m%s\x1b[0m', 'Skipping authentication system installation.');
+    }
+
+    // Set up homepage and global CSS
+    await setupHomePage();
+    await setupGlobalCss();
+
+    // Set up public assets
+    const publicAssetsSetup = await setupPublicAssets();
+    if (!publicAssetsSetup) {
+      console.error('\x1b[31mFailed to set up public assets\x1b[0m');
+      process.exit(1);
+    }
+
+    console.log('\x1b[32m%s\x1b[0m', '✨ Setup completed successfully!');
+    
+    if (installAuth) {
+      console.log('\x1b[36m%s\x1b[0m', 'Next steps:');
+
+      console.log('1. Configure your OAuth providers in .env');
+      console.log("Made with ❤️ by Yash/Rohan/Abhijeet @Aganitha");
+    }
+
+   
+
+    rl.close();
   } catch (error) {
-    console.error('\x1b[31mError setting up authentication:\x1b[0m', error);
+    console.error('\x1b[31mAn error occurred during setup:\x1b[0m', error);
     process.exit(1);
   }
 }
 
-// Start with package installations first
-console.log('\x1b[36m%s\x1b[0m', 'Package Installation');
-
-// Ask about installing authcomp package
-rl.question('Do you want to install the authcomp package? (y/N) ', async (authcompAnswer) => {
-  if (authcompAnswer.toLowerCase() === 'y') {
-    await installPackage('authcomp');
-  }
-
-  // Ask about installing navbar package
-  rl.question('Do you want to install the aganitha-nav-bar package? (y/N) ', async (navbarAnswer) => {
-    if (navbarAnswer.toLowerCase() === 'y') {
-      await installPackage('aganitha-nav-bar');
-    }
-
-    // Now proceed with authentication setup
-    console.log('\n\x1b[36m%s\x1b[0m', 'Next Auth Social UI Setup');
-    console.log('This will set up the authentication route and environment variables.');
-
-    rl.question('Do you want to set up authentication route? (y/N) ', (authAnswer) => {
-      if (authAnswer.toLowerCase() === 'y') {
-        setupAuth();
-      } else {
-        console.log('Authentication setup cancelled.');
-      }
-      rl.close();
-    });
-  });
+// Ensure proper exit handling
+process.on('SIGINT', () => {
+  console.log('\n\x1b[33mSetup interrupted by user\x1b[0m');
+  rl.close();
+  process.exit(0);
 });
+
+process.on('SIGTERM', () => {
+  console.log('\n\x1b[33mSetup terminated\x1b[0m');
+  rl.close();
+  process.exit(0);
+});
+
+// Start the main execution
+main();

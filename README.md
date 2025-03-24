@@ -1,50 +1,173 @@
-# Next Auth Social UI & Navigation Components
+# AuthComp - Next.js Authentication Component
 
-A comprehensive package for Next.js applications that provides customizable authentication UI with social login options and a flexible navigation bar component.
+A comprehensive authentication solution for Next.js applications that provides customizable authentication UI with social login options, email OTP authentication, LDAP authentication, and middleware for protected routes.
 
 ## Features
 
 ### Authentication Component
-- ðŸ”’ Built-in support for Google, GitHub, and LinkedIn authentication
-- ðŸŽ¨ Fully customizable with Tailwind CSS
-- ðŸš€ CLI tool for automatic route setup
-- ðŸ“¦ Easy to install and configure
+- 🔐 Built-in support for Google, GitHub, and LinkedIn authentication
+- 📧 Email OTP authentication for passwordless login
+- 🔑 LDAP authentication for enterprise environments
+- 🎨 Fully customizable with Tailwind CSS
+- 🚀 CLI tool for automatic setup and configuration
+- 📦 Easy to install and integrate
 
-### Navigation Bar Component
-- ðŸš€ Compatible with both React and Next.js
-- ðŸ“± Fully responsive with mobile menu
-- ðŸ”½ Support for dropdown menus
-- ðŸŽ¨ Customizable styling
-- ðŸ”„ Active link highlighting
-- ðŸ–¼ï¸  Logo and app name support
-
-## Quick Start
+## Installation
 
 ```bash
 # Run the setup wizard
 npx authcomp
 ```
 
-The setup wizard will guide you through the installation process and offer to install both the authentication component and the navigation bar component.
+## Quick Start Guide
 
-## Authentication Setup
+### Option 1: Create a New Next.js Project with AuthComp
 
-### 1. Running the Setup Wizard
-
-After installation, run the setup wizard to create the authentication route:
+Running `npx authcomp` without an existing Next.js project will:
+1. Create a new Next.js application
+2. Install and configure authentication components
+3. Set up necessary files and environment variables
 
 ```bash
 npx authcomp
 ```
 
-This will:
-- Create the NextAuth route at `app/api/auth/[...nextauth]/route.ts`
-- Add necessary environment variables to your `.env` file
-- Offer to install the navigation bar component
+The setup wizard will guide you through the installation process.
 
-### 2. Configure Environment Variables
+### Option 2: Add AuthComp to an Existing Next.js Project
 
-Update your `.env` file with your OAuth credentials:
+If you already have a Next.js project:
+
+```bash
+# Navigate to your project
+cd your-nextjs-project
+
+# Run the setup wizard
+npx authcomp
+```
+
+## What the Setup Wizard Does
+
+The AuthComp setup wizard performs the following tasks:
+
+1. **Creates Authentication Routes**:
+   - Sets up NextAuth route at `app/api/auth/[...nextauth]/route.ts`
+   - Creates OTP authentication endpoints:
+     - `/api/auth/request-otp`
+     - `/api/auth/verify-otp`
+
+2. **Adds Middleware**:
+   - Creates a `middleware.ts` file for route protection
+   - Configures protected routes and authentication redirects
+
+3. **Sets Up Utility Files**:
+   - `utils/auth.ts` - Authentication helper functions
+   - `utils/db.ts` - Database utilities for OTP storage
+   - `utils/email.ts` - Email sending functionality for OTP
+
+4. **Creates App Files**:
+   - Creates or updates `app/layout.tsx` (existing files are renamed to `layout.old.tsx`)
+   - Creates `app/login/page.tsx` with pre-configured AuthLogin component
+
+5. **Configures Environment Variables**:
+   - Creates or updates `.env` file with necessary configuration
+
+6. **Handles File Conflicts**:
+   - If files already exist, they are renamed to `{filename}.old.{extension}`
+   - Preserves your existing code while adding new functionality
+
+## Authentication Methods
+
+### Social Authentication
+
+AuthComp supports the following social authentication providers:
+
+- **Google** - OAuth 2.0 authentication with Google accounts
+- **GitHub** - OAuth authentication with GitHub accounts
+- **LinkedIn** - OAuth authentication with LinkedIn accounts
+
+### Email OTP Authentication
+
+Passwordless authentication using one-time passwords sent via email:
+
+1. User enters their email address
+2. A one-time code is sent to their email
+3. User enters the code to authenticate
+4. A session is created upon successful verification
+
+### LDAP Authentication
+
+Enterprise authentication using LDAP protocol:
+
+1. User enters their username and password
+2. The credentials are verified against your LDAP server
+3. A session is created upon successful authentication
+4. User is redirected to the dashboard
+
+## Using the AuthLogin Component
+
+```jsx
+"use client"
+
+import { AuthLogin } from 'authcomp';
+
+export default function LoginPage() {
+  return (
+   j <AuthLogin
+      redirectUrl="/dashboard"
+      logoUrl="/your-logo.svg"
+      title="Welcome Back"
+      subtitle="Sign in to continue"
+      showGoogle={true}
+      showGithub={true}
+      showLinkedin={true}
+      showOTP={true}
+      showLDAP={true}
+      ldapDomain="example.com"
+      buttonClassName="custom-button-class"
+      containerClassName="custom-container-class"
+    />
+  );
+}
+```
+
+### AuthLogin Component Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | string | "" | Additional CSS classes for the root element |
+| `redirectUrl` | string | "/" | URL to redirect after successful login |
+| `title` | string | "Welcome to Aganitha" | Main title text |
+| `subtitle` | string | "You can sign in using your preferred login method" | Subtitle text |
+| `showGoogle` | boolean | true | Toggle Google login button |
+| `showGithub` | boolean | true | Toggle GitHub login button |
+| `showLinkedin` | boolean | true | Toggle LinkedIn login button |
+| `showOTP` | boolean | true | Toggle Email OTP authentication |
+| `showLDAP` | boolean | false | Toggle LDAP authentication |
+| `ldapDomain` | string | "" | Domain to display for LDAP login (e.g., "example.com") |
+| `buttonClassName` | string | "" | Additional CSS classes for buttons |
+| `containerClassName` | string | "" | Additional CSS classes for container |
+| `termsUrl` | string | "#" | URL to terms of service |
+| `privacyUrl` | string | "#" | URL to privacy policy |
+| `logoUrl` | string | "https://www.aganitha.ai/wp-content/uploads/2023/07/logo-crop.svg" | URL to your logo |
+| `logoClassName` | string | "" | Additional CSS classes for logo |
+
+## Route Protection with Middleware
+
+AuthComp includes a middleware configuration that protects routes based on authentication status:
+
+```typescript
+// middleware.ts (automatically created by setup wizard)
+export const config = {
+  matcher: ['/', '/dashboard/:path*', '/profile/:path*']
+};
+```
+
+You can customize the protected routes by modifying the `matcher` array.
+
+## Environment Configuration
+
+Update your `.env` file with your OAuth credentials and LDAP configuration:
 
 ```
 # Authentication
@@ -62,357 +185,71 @@ GITHUB_SECRET=your-github-client-secret
 # LinkedIn OAuth
 LINKEDIN_CLIENT_ID=your-linkedin-client-id
 LINKEDIN_CLIENT_SECRET=your-linkedin-client-secret
+
+# Email (for OTP)
+EMAIL_SERVER=smtp://username:password@smtp.example.com:587
+EMAIL_FROM=noreply@example.com
+
+# LDAP Configuration
+LDAP_URI=ldap://ldap.example.com
+LDAP_USER_DN=ou=people,dc=example,dc=com
+LDAP_EMAIL_DOMAIN=example.com
 ```
 
-### 3. Using the AuthLogin Component
+## Advanced Usage
 
-```jsx
-import { AuthLogin } from 'next-auth-social-ui';
+### Custom Email Templates
 
-export default function LoginPage() {
-  return (
-    <AuthLogin 
-      callbackUrl="/dashboard"
-      // Additional customization props
-      title="Welcome Back"
-      subtitle="Sign in to continue"
-      showGoogle={true}
-      showGithub={true}
-      showLinkedin={true}
-      buttonClassName="custom-button-class"
-      containerClassName="custom-container-class"
-    />
-  );
-}
-```
-
-### AuthLogin Component Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `className` | string | "" | Additional CSS classes for the root element |
-| `callbackUrl` | string | "/" | URL to redirect after successful login |
-| `title` | string | "Welcome back" | Main title text |
-| `subtitle` | string | "Continue with..." | Subtitle text |
-| `showGoogle` | boolean | true | Toggle Google login button |
-| `showGithub` | boolean | true | Toggle GitHub login button |
-| `showLinkedin` | boolean | true | Toggle LinkedIn login button |
-| `buttonClassName` | string | "" | Additional CSS classes for buttons |
-| `containerClassName` | string | "" | Additional CSS classes for container |
-
-
-## Navigation Bar Setup
-
-The navigation bar component is part of the `aganitha-nav-bar` package that can be installed during the setup wizard.
-
-### Using the NavBar Component
-
-## Usage
-
-### With Next.js
-
-```jsx
-'use client'; // For Next.js App Router
-
-import { NavBar } from 'aganitha-nav-bar';
-
-export default function Layout() {
-  const navItems = [
-    { label: 'Home', path: '/' },
-    { 
-      label: 'Services', 
-      path: '/services',
-      dropdown: [
-        { label: 'Web Development', path: '/services/web' },
-        { label: 'App Development', path: '/services/app' }
-      ]
-    },
-    { label: 'About', path: '/about' },
-    { label: 'Contact', path: '/contact' }
-  ];
-
-  return (
-    <div>
-      <NavBar 
-        appName="My App"
-        logoUrl="/logo.png"
-        navItems={navItems}
-      />
-      <main>{/* Your page content */}</main>
-    </div>
-  );
-}
-```
-
-### With React
-
-```jsx
-import { NavBar } from 'aganitha-nav-bar';
-import { BrowserRouter as Router } from 'react-router-dom';
-
-function App() {
-  const navItems = [
-    { label: 'Home', path: '/' },
-    { 
-      label: 'Services', 
-      path: '/services',
-      dropdown: [
-        { label: 'Web Development', path: '/services/web' },
-        { label: 'App Development', path: '/services/app' }
-      ]
-    },
-    { label: 'About', path: '/about' },
-    { label: 'Contact', path: '/contact' }
-  ];
-
-  // For React Router integration
-  const handleNavigate = (path) => {
-    // Custom navigation logic if needed
-    console.log(`Navigating to ${path}`);
-  };
-
-  return (
-    <Router>
-      <div>
-        <NavBar 
-          appName="My App"
-          logoUrl="/logo.png"
-          navItems={navItems}
-          onNavigate={handleNavigate}
-        />
-        {/* Your routes */}
-      </div>
-    </Router>
-  );
-}
-
-export default App;
-```
-
-## Configuration
-
-### NavBar Props
-
-| Prop | Type | Description | Default |
-|------|------|-------------|---------|
-| `appName` | `string` | The name of your application | `undefined` |
-| `logoUrl` | `string` | URL to your logo image | `undefined` |
-| `navItems` | `NavItem[]` | Array of navigation items | `[]` (required) |
-| `customStyles` | `React.CSSProperties` | Custom styles for the navbar | `undefined` |
-| `onNavigate` | `(path: string) => void` | Callback function when navigation occurs | `undefined` |
-
-### NavItem Type
+You can customize the OTP email template by modifying the `utils/email.ts` file:
 
 ```typescript
-interface DropdownItem {
-  label: string;
-  path: string;
-}
-
-interface NavItem {
-  label: string;
-  path: string;
-  icon?: string;
-  dropdown?: DropdownItem[];
-  type?: "link" | "auth-signin" | "auth-signout";
-}
+// Customize the email content and styling
+const html = `
+  <div style="...">
+    <h1>Your Authentication Code</h1>
+    <p>Your one-time password is: <strong>${otp}</strong></p>
+    <p>This code will expire in 10 minutes.</p>
+  </div>
+`;
 ```
 
-## Configuring with YAML (for Next.js)
+### Database Integration
 
-You can also configure the navigation using a YAML file:
+By default, AuthComp uses a SQLite database for OTP storage. You can customize the database configuration in `utils/db.ts`.
 
-1. Create a `nav-config.yaml` file in your project root:
+### Styling Customization
 
-```yaml
-appName: My Application
-logoUrl: /logo.png
-navigation:
-  - label: Home
-    path: /
-  - label: Services
-    path: /services
-    dropdown:
-      - label: Web Development
-        path: /services/web
-      - label: App Development
-        path: /services/app
-  - label: About
-    path: /about
-  - label: Contact
-    path: /contact
-```
+The AuthLogin component is built with Tailwind CSS and is fully customizable:
 
-2. Use the `getNavConfig` utility:
-
-```jsx
-// In your layout or page component
-'use client';
-
-// app/page.tsx
-import { NavBar } from 'aganitha-nav-bar';
-import { getNavConfig } from 'aganitha-nav-bar';
-
-export default async function Home() {
-  const navConfig = await getNavConfig();
-
-  return (
-      <NavBar 
-        appName={navConfig.appName} 
-        logoUrl={navConfig.logoUrl} 
-        navItems={navConfig.navigation} 
-      />
-  );
-}
-```
-
-## Styling
-
-The component comes with default styling that you can customize in several ways:
-
-### Using customStyles prop
-
-```jsx
-<NavBar
-  navItems={navItems}
-  customStyles={{
-    background: '#f5f5f5',
-    color: '#333',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  }}
-/>
-```
-
-### Using CSS variables
-
-The component uses these CSS variables that you can override in your global CSS:
-
-```css
-:root {
-  --border: #e2e8f0;
-  --primary: #0070f3;
-  --primary-foreground: white;
-}
-```
-
-### Tailwind CSS
-
-The component is built with Tailwind CSS classes. If you're using Tailwind in your project, you can customize the appearance by configuring your theme in your `tailwind.config.js`.
-
-## TypeScript Support
-
-This package includes TypeScript definitions. Import types as needed:
-
-```typescript
-import { NavBar } from 'aganitha-nav-bar';
-import type { NavItem, DropdownItem } from 'aganitha-nav-bar/types';
-
-## Styling
-
-### Theme Configuration
-
-To use the Aganitha theme colors, add the following to your Tailwind configuration:
-
-#### For Tailwind CSS 3.x (tailwind.config.js)
-
-```javascript
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        aganitha: {
-          primary: "#000000",    // Black
-          accent: "#323232",     // Dark Brown
-          secondary: "#323232",  // Dark Brown
-          background: "#DDD0C8", // Light Beige
-          text: "#000000",       // Black
-          button: "#323232",     // Dark Brown
-        }
-      }
-    }
-  }
-}
-```
-
-#### For Tailwind CSS 4.x (global.css)
-
-```css
-@theme {
-    --aganitha-primary: #000000;    /* Black */
-    --aganitha-accent: #323232;     /* Dark Brown */
-    --aganitha-secondary: #323232;  /* Dark Brown */
-    --aganitha-background: #DDD0C8; /* Light Beige */
-    --aganitha-text: #000000;       /* Black */
-    --aganitha-button: #323232;     /* Dark Brown */
-  }
-
-```
-
-### CSS Variables
-
-The NavBar component uses these CSS variables that you can override in your global CSS:
-
-```css
-:root {
-  --border: #e2e8f0;
-  --primary: #0070f3;
-  --primary-foreground: white;
-}
-```
-
-## CLI Output Example
-
-When you run `npx authcomp`, you'll see something like this:
-
-```
-npx authcomp
-
-Ok to proceed? (y) y
-
-Package Installation
-Do you want to install the authcomp package? (y/N) y
-Installing authcomp...
-âœ“ Successfully installed authcomp
-
-Do you want to install the aganitha-nav-bar package? (y/N) y
-Installing aganitha-nav-bar...
-âœ“ Successfully installed aganitha-nav-bar
-
-Next Auth Social UI Setup
-This will set up the authentication route and environment variables.
-Do you want to set up authentication route? (y/N) y
-âœ“ Authentication route created successfully!
-âœ“ Environment variables added to .env file
-
-Next steps:
-1. Update your .env file with your OAuth credentials
-2. Add AuthLogin component to your pages:
-
-import { AuthLogin } from 'next-auth-social-ui';
-
-export default function LoginPage() {
-  return (
-    <AuthLogin 
-      callbackUrl="/dashboard"
-      // Additional customization props
-      title="Welcome Back"
-      subtitle="Sign in to continue"
-      showGoogle={true}
-      showGithub={true}
-      showLinkedin={true}
-      buttonClassName="custom-button-class"
-      containerClassName="custom-container-class"
-    />
-  );
-}
-```
+- Use the `className`, `buttonClassName`, and `containerClassName` props to add custom styles
+- The component uses a modern, responsive design that adapts to different screen sizes
+- Animation effects are included for a polished user experience
 
 ## Requirements
 
-- Next.js 13+
+- Next.js 13+ (App Router)
 - React 18+
-- NextAuth.js 4+
+- Node.js 16+
 - Tailwind CSS 3+
+
+## Troubleshooting
+
+### File Conflicts
+
+If you encounter file conflicts during setup, AuthComp will rename existing files to `{filename}.old.{extension}` and create new ones. You can:
+
+1. Compare the old and new files to merge your changes
+2. Delete the `.old` files once you've verified everything works
+
+### OAuth Configuration
+
+For social login to work correctly:
+
+1. Create OAuth applications with the respective providers
+2. Configure the correct redirect URIs:
+   - Google: `https://your-domain.com/api/auth/callback/google`
+   - GitHub: `https://your-domain.com/api/auth/callback/github`
+   - LinkedIn: `https://your-domain.com/api/auth/callback/linkedin`
 
 ## License
 

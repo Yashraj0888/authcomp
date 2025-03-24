@@ -1,11 +1,11 @@
 {
-  "name": "authcomp",
-  "version": "1.5.0",
+  "name": "aganitha-starter-app",
+  "version": "3.3.0",
   "description": "A customizable Next.js social authentication UI component with Tailwind CSS styling",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "next-auth-social-ui": "./bin/cli.js"
+    "authcomp": "./bin/cli.js"
   },
   "scripts": {
     "build": "tsc",
@@ -22,11 +22,15 @@
     "typescript"
   ],
   "dependencies": {
-    "next": "^14.0.0",
-    "next-auth": "^4.24.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-icons": "^4.12.0"
+    "aganitha-authentication-component": "^1.9.0",
+    "aganitha-nav-bar": "^1.1.17",
+    "better-sqlite3": "^11.9.1",
+    "next": ">=13.0.0",
+    "next-auth": ">=4.0.0",
+    "nodemailer": "^6.10.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "react-icons": ">=4.0.0"
   },
   "peerDependencies": {
     "next": ">=13.0.0",
@@ -37,7 +41,9 @@
     "tailwindcss": ">=3.0.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^20.0.0",
+    "@types/nodemailer": "^6.4.17",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "autoprefixer": "^10.4.0",
@@ -47,7 +53,12 @@
   },
   "files": [
     "dist",
-    "bin"
+    "bin",
+    "src",
+    "utils",
+    "setup",
+    "README.md",
+    "config"
   ],
   "author": "",
   "license": "MIT"
