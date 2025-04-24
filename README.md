@@ -109,7 +109,7 @@ Enterprise authentication using LDAP protocol:
 ```jsx
 "use client"
 
-import { AuthLogin } from 'authcomp';
+import { AuthLogin } from '@aganitha/authentication-component';
 
 export default function LoginPage() {
   return (
@@ -253,4 +253,4 @@ For social login to work correctly:
 
 ## License
 
-MIT
+@Aganitha.ai 

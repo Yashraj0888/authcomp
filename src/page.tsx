@@ -428,7 +428,7 @@ export default function Home() {
         navItems={navConfigData.navigation}
         button={{
           label: "Login",
-        onClick: handleLogout
+          href: "/login"
         }}
         onNavigate={handleNavigate}
         appName={""}
