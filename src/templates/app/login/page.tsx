@@ -1,6 +1,6 @@
 "use client"
 import React from "react";
-import { AuthLogin } from "@aganithadev/authentication-component";
+import { AuthLogin } from "@aganitha/authentication-component";
 
 export default function LoginPage() {
   return (

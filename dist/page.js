@@ -1,20 +1,66 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// page.tsx
 "use client";
-import { NavBar } from "aganitha-nav-bar";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+import { NavBar } from "@aganitha/nav-bar";
+import { signOut } from 'next-auth/react';
 import { useRef, useState, useEffect } from "react";
-import { ArrowRight, ChevronDown, Zap, Mail, Phone, MapPin, Linkedin, Twitter, } from "lucide-react";
+import { ArrowRight, ChevronDown, Zap, Mail, Phone, MapPin, Linkedin, Twitter, HomeIcon, InfoIcon, ZapIcon, Contact2Icon, BellDotIcon, } from "lucide-react";
 import Link from "next/link";
 import React from "react";
+var handleLogout = function () { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, signOut({ callbackUrl: '/logout' })];
+            case 1:
+                _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); };
 // Hardcoded nav config data
 var navConfigData = {
     appName: "Aganitha",
     logoUrl: "https://www.aganitha.ai/wp-content/uploads/2023/05/aganitha-logo.png",
     navigation: [
-        { label: "Home", path: "#hero" },
-        { label: "About", path: "#about" },
-        { label: "Features", path: "#features" },
-        { label: "Contact", path: "#contact" },
+        { label: "Home", path: "#hero", icon: HomeIcon },
+        { label: "About", path: "#about", icon: InfoIcon },
+        { label: "Features", path: "#features", icon: ZapIcon },
+        { label: "Contact", path: "#contact", icon: Contact2Icon },
+        { id: "notification", path: "/login", icon: BellDotIcon }
     ],
 };
 // Utility function to simulate getNavConfig
@@ -38,30 +84,6 @@ var Button = function (_a) {
         React.createElement("span", { className: "relative z-10 flex items-center" }, children),
         React.createElement("style", { jsx: true }, "\n        @keyframes button-pulse {\n          0% {\n            transform: scale(1);\n            box-shadow: 0 0 10px var(--ring);\n          }\n          50% {\n            transform: scale(1.05);\n            box-shadow: 0 0 20px var(--ring);\n          }\n          100% {\n            transform: scale(1);\n            box-shadow: 0 0 10px var(--ring);\n          }\n        }\n      ")));
 };
-// Scroll Indicator Component
-var ScrollIndicator = function () {
-    var _a = useState(0), scrollProgress = _a[0], setScrollProgress = _a[1];
-    var _b = useState(false), isMounted = _b[0], setIsMounted = _b[1];
-    useEffect(function () {
-        setIsMounted(true);
-        var handleScroll = function () {
-            var windowHeight = window.innerHeight;
-            var documentHeight = document.documentElement.scrollHeight;
-            var currentScrollY = window.scrollY;
-            setScrollProgress(currentScrollY / (documentHeight - windowHeight));
-        };
-        window.addEventListener("scroll", handleScroll, { passive: true });
-        return function () { return window.removeEventListener("scroll", handleScroll); };
-    }, []);
-    if (!isMounted)
-        return null;
-    return (React.createElement("div", { className: "fixed bottom-8 right-8 z-50 flex flex-col items-center" },
-        React.createElement("div", { className: "w-1 h-20 bg-[var(--primary)]/30 rounded-full overflow-hidden" },
-            React.createElement("div", { className: "w-full bg-[var(--primary)] origin-top transition-all duration-300", style: { height: "".concat(scrollProgress * 100, "%") } })),
-        React.createElement("div", { className: "mt-2" },
-            React.createElement(ChevronDown, { className: "text-[var(--primary)] animate-scroll-bounce" })),
-        React.createElement("style", { jsx: true }, "\n        @keyframes scroll-bounce {\n          0%,\n          100% {\n            transform: translateY(0);\n            opacity: 0.7;\n          }\n          50% {\n            transform: translateY(-10px);\n            opacity: 1;\n          }\n        }\n        .animate-scroll-bounce {\n          animation: scroll-bounce 1.5s infinite ease-in-out;\n        }\n      ")));
-};
 // Navigation Dots Component
 var NavDots = function (_a) {
     var onNavigate = _a.onNavigate;
@@ -69,6 +91,7 @@ var NavDots = function (_a) {
     var sections = [
         { id: "hero", label: "Home" },
         { id: "about", label: "About" },
+        { id: "themes", label: "Themes" },
         { id: "features", label: "Features" },
         { id: "contact", label: "Contact" },
     ];
@@ -77,9 +100,27 @@ var NavDots = function (_a) {
     }, []);
     if (!isMounted)
         return null;
+    var handleThemesClick = function (path) {
+        if (path === "#themes") {
+            // Special handling for themes - scroll to the theming section in about
+            var themingSection = document.querySelector("#about .theming-section");
+            if (themingSection) {
+                themingSection.scrollIntoView({ behavior: "smooth" });
+            }
+            else {
+                // Fallback to about section if theming section not found
+                onNavigate("#about");
+            }
+        }
+        else {
+            onNavigate(path);
+        }
+    };
     return (React.createElement("div", { className: "fixed right-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-4" }, sections.map(function (section) { return (React.createElement("div", { key: section.id, className: "group relative" },
-        React.createElement("button", { onClick: function () { return onNavigate("#".concat(section.id)); }, className: "w-3 h-3 bg-[var(--primary)]/50 rounded-full hover:bg-[var(--primary)] transition-all duration-300" }),
-        React.createElement("span", { className: "absolute right-6 top-1/2 -translate-y-1/2 bg-[var(--card)] text-[var(--foreground)] px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" }, section.label))); })));
+        React.createElement("button", { onClick: function () { return handleThemesClick("#".concat(section.id)); }, className: "w-3 h-3 bg-[var(--primary)]/50 rounded-full hover:bg-[var(--primary)] transition-all duration-300" }),
+        React.createElement("span", { className: "absolute right-6 top-1/2 -translate-y-1/2 bg-[var(--card)] text-[var(--foreground)] px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" }, section.id === "themes"
+            ? "".concat(section.label, " - Customize at tweakcn.com")
+            : section.label))); })));
 };
 // Solutions AI Animation Component
 var SolutionsAIAnimation = function (_a) {
@@ -180,7 +221,6 @@ export default function Home() {
         (_a = aboutRef.current) === null || _a === void 0 ? void 0 : _a.scrollIntoView({ behavior: "smooth" });
     };
     return (React.createElement("div", { className: "min-h-screen overflow-x-hidden" },
-        React.createElement(ScrollIndicator, null),
         React.createElement(NavDots, { onNavigate: handleNavigate }),
         React.createElement("div", { className: "absolute inset-0 pointer-events-none" },
             React.createElement("div", { className: "absolute top-1/4 left-1/4 w-64 h-64 bg-[var(--primary)]/20 rounded-full blur-3xl -z-10 animate-float-blob opacity-30" }),
@@ -188,9 +228,9 @@ export default function Home() {
             React.createElement("div", { className: "absolute top-1/2 right-1/3 w-40 h-40 bg-[var(--primary)]/20 rounded-full blur-3xl -z-10 animate-float-blob opacity-30", style: { animationDelay: "2s" } })),
         React.createElement(NavBar, { logoUrl: navConfigData.logoUrl, navItems: navConfigData.navigation, button: {
                 label: "Login",
-                href: "/login",
+                onClick: handleLogout
             }, onNavigate: handleNavigate, appName: "" }),
-        React.createElement("section", { id: "hero", ref: heroRef, className: "min-h-screen pt-32 pbBlog-20 flex items-center justify-center relative overflow-hidden" },
+        React.createElement("section", { id: "hero", ref: heroRef, className: "min-h-screen pt-32 pb-20 flex items-center justify-center relative overflow-hidden" },
             React.createElement("div", { className: "container mx-auto px-4 z-10" },
                 React.createElement("div", { className: "text-center ".concat(heroInView ? "animate-hero-slide-in" : "") },
                     React.createElement("h1", { className: "text-4xl md:text-6xl font-bold mb-6 leading-tight" },
@@ -250,7 +290,7 @@ export default function Home() {
                     React.createElement("h4", { className: "text-xl font-medium mt-6 mb-2 text-[var(--foreground)] text-center" }, "Usage"),
                     React.createElement("p", { className: "text-[var(--muted-foreground)] text-center mb-2" }, "Import and use the NavBar component in your Next.js page:"),
                     React.createElement("pre", { className: "bg-[var(--muted)] p-4 rounded-md text-[var(--foreground)] overflow-x-auto max-w-2xl mx-auto" },
-                        React.createElement("code", null, "\"use client\"\nimport { NavBar } from 'aganitha-nav-bar';\nimport Link from 'next/link';\nimport { ArrowRight } from 'lucide-react';\n\nconst navItems = [\n  { label: 'Home', path: '#hero' },\n  {\n    label: 'About',\n    path: '#about',\n    dropdown: [\n      { label: 'Our Team', path: '#team' },\n      { label: 'Our Mission', path: '#mission' }\n    ]\n  },\n  { label: 'Features', path: '#features' },\n  { label: 'Contact', path: '#contact' }\n];\n\nexport default function Home() {\n  const handleNavigate = (path: string) => {\n    console.log(`Navigating to ${path}`);\n  };\n\n  return (\n    <NavBar\n      logoUrl=\"https://www.aganitha.ai/wp-content/uploads/2023/05/aganitha-logo.png\"\n      appName=\"Aganitha\"\n      navItems={navItems}\n      onNavigate={handleNavigate}\n      button={\n        <Link\n          href=\"/login\"\n          className=\"group flex items-center px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-full hover:bg-[var(--primary)] hover:opacity-80 transition-opacity duration-150 shadow-md\"\n        >\n          Login\n          <ArrowRight className=\"ml-2 h-4 w-4\" />\n        </Link>\n      }\n      colors={{\n        background: \"var(--background)\",\n        foreground: \"var(--foreground)\",\n        primary: \"var(--primary)\",\n        primaryForeground: \"var(--primary-foreground)\",\n      }}\n    />\n  );\n}")),
+                        React.createElement("code", null, "\"use client\";\n\nimport { NavBar } from 'aganitha-nav-bar';\nimport Link from 'next/link';\nimport { ArrowRight } from 'lucide-react';\n\n// Navigation configuration\nconst navItems = [\n  { label: \"Home\", path: \"#hero\" },\n  {\n    label: \"About\",\n    path: \"#about\",\n    dropdown: [\n      { label: \"Our Team\", path: \"#team\" },\n      { label: \"Our Mission\", path: \"#mission\" },\n    ],\n  },\n  { label: \"Features\", path: \"#features\" },\n  { label: \"Contact\", path: \"#contact\" },\n];\n\nexport default function Home() {\n  const handleNavigate = (path: string) => {\n    const section = document.querySelector(path);\n    section?.scrollIntoView({ behavior: \"smooth\" });\n  };\n\n  return (\n    <NavBar\n      logoUrl=\"https://www.aganitha.ai/wp-content/uploads/2023/05/aganitha-logo.png\"\n      appName=\"Aganitha\"\n      navItems={navItems}\n      onNavigate={handleNavigate}\n      button={{ label: \"Login\", href: \"/login\" }}\n    />\n  );\n}")),
                     React.createElement("h4", { className: "text-xl font-medium mt-6 mb-2 text-[var(--foreground)] text-center" }, "Props"),
                     React.createElement("div", { className: "overflow-x-auto max-w-4xl mx-auto" },
                         React.createElement("table", { className: "w-full text-left border-collapse" },
@@ -291,12 +331,6 @@ export default function Home() {
                                     desc: "Custom button to display on the right side of the nav bar.",
                                     default: "undefined",
                                 },
-                                {
-                                    prop: "colors",
-                                    type: "ColorProps",
-                                    desc: "Object to specify CSS variable names for theming.",
-                                    default: '{ background: "var(--background)", foreground: "var(--foreground)", primary: "var(--primary)", primaryForeground: "var(--primary-foreground)" }',
-                                },
                             ].map(function (row, index) { return (React.createElement("tr", { key: index, className: "border-b border-[var(--border)] ".concat(aboutInView ? "animate-table-row" : ""), style: { animationDelay: "".concat(0.05 * index + 0.1, "s") } },
                                 React.createElement("td", { className: "p-3 text-[var(--muted-foreground)]" }, row.prop),
                                 React.createElement("td", { className: "p-3 text-[var(--muted-foreground)]" }, row.type),
@@ -305,38 +339,17 @@ export default function Home() {
                     React.createElement("h4", { className: "text-xl font-medium mt-6 mb-2 text-[var(--foreground)] text-center" }, "NavItem Type"),
                     React.createElement("pre", { className: "bg-[var(--muted)] p-4 rounded-md text-[var(--foreground)] overflow-x-auto max-w-md mx-auto" },
                         React.createElement("code", null, "interface NavItem {\n  label: string;\n  path?: string;\n  dropdown?: DropdownItem[];\n  type?: string;\n  hidden?: boolean;\n}\n\ninterface DropdownItem {\n  label: string;\n  path: string;\n}")),
-                    React.createElement("h4", { className: "text-xl font-medium mt-6 mb-2 text-[var(--foreground)] text-center" }, "ColorProps Type"),
+                    React.createElement("h4", { id: "theming-section", className: "text-xl font-medium mt-6 mb-2 text-[var(--foreground)] text-center theming-section" }, "Theming"),
                     React.createElement("p", { className: "text-[var(--muted-foreground)] text-center mb-2" },
-                        "The ",
-                        React.createElement("code", { className: "bg-[var(--muted)] px-1 rounded" }, "colors"),
+                        "To customize the colors, visit",
                         " ",
-                        "prop allows you to specify CSS variable names for theming:"),
-                    React.createElement("pre", { className: "bg-[var(--muted)] p-4 rounded-md text-[var(--foreground)] overflow-x-auto max-w-md mx-auto" },
-                        React.createElement("code", null, "interface ColorProps {\n  background?: string;        // e.g., \"var(--background)\"\n  foreground?: string;        // e.g., \"var(--foreground)\"\n  primary?: string;           // e.g., \"var(--primary)\"\n  primaryForeground?: string; // e.g., \"var(--primary-foreground)\"\n}")),
-                    React.createElement("h4", { className: "text-xl font-medium mt-6 mb-2 text-[var(--foreground)] text-center" }, "Theming"),
-                    React.createElement("p", { className: "text-[var(--muted-foreground)] text-center mb-2" },
-                        "Define these variables in your",
+                        React.createElement("a", { href: "https://tweakcn.com/editor/theme", target: "_blank", rel: "noopener noreferrer", className: "text-[var(--primary)] hover:underline" }, "tweakcn.com/editor/theme"),
+                        " ",
+                        "to generate your theme template. Copy the generated CSS code and paste it into your",
                         " ",
                         React.createElement("code", { className: "bg-[var(--muted)] px-1 rounded" }, "globals.css"),
                         " ",
-                        "file to customize the colors:"),
-                    React.createElement("pre", { className: "bg-[var(--muted)] p-4 rounded-md text-[var(--foreground)] overflow-x-auto max-w-md mx-auto" },
-                        React.createElement("code", null, "/* globals.css */\n:root {\n  --background: oklch(0.97 0.01 314.78);\n  --foreground: oklch(0.37 0.03 259.73);\n  --primary: oklch(0.71 0.16 293.54);\n  --primary-foreground: oklch(1.00 0 0);\n}\n\n.dark {\n  --background: oklch(0.22 0.01 56.04);\n  --foreground: oklch(0.93 0.03 272.79);\n  --primary: oklch(0.79 0.12 295.75);\n  --primary-foreground: oklch(0.22 0.01 56.04);\n}")),
-                    React.createElement("h4", { className: "text-xl font-medium mt-6 mb-2 text-[var(--foreground)] text-center" }, "Notes"),
-                    React.createElement("ul", { className: "list-disc pl-6 text-[var(--muted-foreground)] max-w-md mx-auto" },
-                        React.createElement("li", null,
-                            "Styling Restrictions: Customize colors only via the",
-                            " ",
-                            React.createElement("code", { className: "bg-[var(--muted)] px-1 rounded" }, "colors"),
-                            " ",
-                            "prop using CSS variable names."),
-                        React.createElement("li", null, "Responsive Design: Fully responsive with a mobile menu toggle for smaller screens."),
-                        React.createElement("li", null,
-                            "Dependencies: Ensure",
-                            " ",
-                            React.createElement("code", { className: "bg-[var(--muted)] px-1 rounded" }, "lucide-react"),
-                            " ",
-                            "is installed for icons."))),
+                        "file to apply it to your project.")),
                 React.createElement("div", { className: "mb-16 ".concat(aboutInView ? "animate-slide-left" : ""), style: { animationDelay: "0.2s" } },
                     React.createElement("h3", { className: "text-2xl font-semibold mb-4 text-[var(--foreground)] text-center" }, "Features"),
                     React.createElement("h4", { className: "text-xl font-medium mb-2 text-[var(--foreground)] text-center" }, "Authentication Component"),

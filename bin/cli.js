@@ -54,7 +54,7 @@ async function installAuthComp() {
   console.log('\x1b[36m%s\x1b[0m', 'Installing authcomp...');
   try {
     // Use installPackage from installUtils
-    const success = await installPackage('authcomp@latest');
+    const success = await installPackage('@aganitha/authentication-component@latest');
     if (!success) {
       throw new Error('Failed to install authcomp');
     }
@@ -148,10 +148,9 @@ async function main() {
     console.log('\x1b[32m%s\x1b[0m', '✨ Setup completed successfully!');
     
     if (installAuth) {
-      console.log('\x1b[36m%s\x1b[0m', 'Next steps:');
+      console.log('Now Configure your OAuth providers in .env');
 
-      console.log('1. Configure your OAuth providers in .env');
-      console.log("Made with ❤️ by Yash/Rohan/Abhijeet @Aganitha");
+      console.log("Made with ❤️  by Yash/Rohan/Abhijeet @Aganitha");
     }
 
    

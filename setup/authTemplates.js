@@ -30,10 +30,8 @@ async function setupAuthTemplates() {
         src: path.join(__dirname, '..', 'src', 'templates', 'app', 'api', 'auth', 'request-otp', 'route.ts'),
         dest: path.join(process.cwd(), 'app', 'api', 'auth', 'request-otp', 'route.ts')
       },
-      {
-        src: path.join(__dirname, '..', 'src', 'templates', 'app', 'api', 'auth', 'verify-otp', 'route.ts'),
-        dest: path.join(process.cwd(), 'app', 'api', 'auth', 'verify-otp', 'route.ts')
-      }
+      
+      
     ];
 
     // Create necessary directories and copy files

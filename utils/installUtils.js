@@ -6,11 +6,11 @@ async function installDependencies() {
   try {
     // Install core dependencies
     const dependencies = [
-      '@types/better-sqlite3',
+      'sqlite3',
       'jose',
-      '@aganithadev/nav-bar@latest',
+      '@aganitha/nav-bar@latest',
       'lucide-react',
-      '@aganithadev/authentication-component@latest'
+      '@aganitha/authentication-component'
     ];
 
     for (const dep of dependencies) {

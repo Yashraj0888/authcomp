@@ -31,5 +31,5 @@ export var metadata = {
 export default function RootLayout(_a) {
     var children = _a.children;
     return (React.createElement("html", { lang: "en", className: "".concat(inter.variable, " ").concat(poppins.variable) },
-        React.createElement("body", { className: "font-sans" }, children)));
+        React.createElement("body", { suppressHydrationWarning: true, className: "font-sans" }, children)));
 }

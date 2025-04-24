@@ -3,7 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import LinkedInProvider, { LinkedInProfile } from "next-auth/providers/linkedin";
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { db } from "../../../../utils/db";
+import { dbGet, dbRun } from "../../../../utils/db";
 const ldap = require("ldapjs")
 
 // Define interfaces for database query results
@@ -52,52 +52,55 @@ const handler = NextAuth({
       },
     }),
     CredentialsProvider({
-      id: "verify-otp",
+      id: 'verify-otp',
       name: 'OTP',
       credentials: {
-        email: { label: "Email", type: "email" },
-        otp: { label: "OTP", type: "text" },
-        userId: { label: "User ID", type: "text" },
+        email: { label: 'Email', type: 'email' },
+        otp: { label: 'OTP', type: 'text' },
+        userId: { label: 'User ID', type: 'text' },
       },
       async authorize(credentials) {
-
         if (!credentials?.email || !credentials?.otp || !credentials?.userId) {
           console.log('Missing credentials');
-          throw new Error("Missing OTP credentials");
+          throw new Error('Missing OTP credentials');
         }
-
-        const result = db.prepare(`
+  
+        const sqlOtp = `
           SELECT * FROM otp_codes
           WHERE user_id = ?
           AND code = ?
           AND expires_at > datetime('now')
           AND used = FALSE
           LIMIT 1
-        `).get(credentials.userId, credentials.otp);
-
+        `;
+  
+        const result = await dbGet<OTPCode>(sqlOtp, [
+          credentials.userId,
+          credentials.otp,
+        ]);
         console.log('OTP query result:', result);
-
+  
         if (!result) {
           console.log('Invalid OTP or expired');
-          throw new Error("Invalid or expired OTP");
+          throw new Error('Invalid or expired OTP');
         }
-
-        db.prepare(`
+  
+        const updateSql = `
           UPDATE otp_codes
           SET used = TRUE
           WHERE id = ?
-        `).run((result as OTPCode).id);
-
-        const user = db.prepare('SELECT * FROM users WHERE id = ?')
-          .get(credentials.userId) as User | undefined;
-
+        `;
+        await dbRun(updateSql, [result.id]);
+  
+        const sqlUser = 'SELECT * FROM users WHERE id = ?';
+        const user = await dbGet<User>(sqlUser, [credentials.userId]);
         console.log('User query result:', user);
-
+  
         if (!user) {
           console.log('User not found');
-          throw new Error("User not found");
+          throw new Error('User not found');
         }
-
+  
         return {
           id: user.id,
           email: user.email,
@@ -114,7 +117,7 @@ const handler = NextAuth({
         callbackUrl: { label: "Callback URL", type: "text" }
       },
       async authorize(credentials) {
-        console.log("Authorizing with LDAP credentials:", credentials);
+        // console.log("Authorizing with LDAP credentials:", credentials);
         if (!credentials?.username || !credentials?.password) {
           console.log("Missing LDAP credentials");
           throw new Error("Missing LDAP credentials");

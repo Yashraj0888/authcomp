@@ -16,20 +16,20 @@ A comprehensive authentication solution for Next.js applications that provides c
 
 ```bash
 # Run the setup wizard
-npx authcomp
+npx @aganitha/starter-template
 ```
 
 ## Quick Start Guide
 
 ### Option 1: Create a New Next.js Project with AuthComp
 
-Running `npx authcomp` without an existing Next.js project will:
+Running `npx @aganitha/starter-template` without an existing Next.js project will:
 1. Create a new Next.js application
 2. Install and configure authentication components
 3. Set up necessary files and environment variables
 
 ```bash
-npx authcomp
+npx @aganitha/starter-template
 ```
 
 The setup wizard will guide you through the installation process.
@@ -43,7 +43,7 @@ If you already have a Next.js project:
 cd your-nextjs-project
 
 # Run the setup wizard
-npx authcomp
+npx @aganitha/starter-template
 ```
 
 ## What the Setup Wizard Does
@@ -113,7 +113,7 @@ import { AuthLogin } from 'authcomp';
 
 export default function LoginPage() {
   return (
-   j <AuthLogin
+   <AuthLogin
       redirectUrl="/dashboard"
       logoUrl="/your-logo.svg"
       title="Welcome Back"

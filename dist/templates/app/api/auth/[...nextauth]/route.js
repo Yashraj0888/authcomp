@@ -8,12 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
-    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (g && (g = 0, op[0] && (_ = 0)), _) try {
+        while (_) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -39,7 +39,7 @@ import GoogleProvider from "next-auth/providers/google";
 import GithubProvider from "next-auth/providers/github";
 import LinkedInProvider from "next-auth/providers/linkedin";
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { db } from "../../../../utils/db";
+import { dbGet, dbRun } from "../../../../utils/db";
 var ldap = require("ldapjs");
 var handler = NextAuth({
     providers: [
@@ -70,39 +70,53 @@ var handler = NextAuth({
             },
         }),
         CredentialsProvider({
-            id: "verify-otp",
+            id: 'verify-otp',
             name: 'OTP',
             credentials: {
-                email: { label: "Email", type: "email" },
-                otp: { label: "OTP", type: "text" },
-                userId: { label: "User ID", type: "text" },
+                email: { label: 'Email', type: 'email' },
+                otp: { label: 'OTP', type: 'text' },
+                userId: { label: 'User ID', type: 'text' },
             },
             authorize: function (credentials) {
                 return __awaiter(this, void 0, void 0, function () {
-                    var result, user;
+                    var sqlOtp, result, updateSql, sqlUser, user;
                     return __generator(this, function (_a) {
-                        if (!(credentials === null || credentials === void 0 ? void 0 : credentials.email) || !(credentials === null || credentials === void 0 ? void 0 : credentials.otp) || !(credentials === null || credentials === void 0 ? void 0 : credentials.userId)) {
-                            console.log('Missing credentials');
-                            throw new Error("Missing OTP credentials");
+                        switch (_a.label) {
+                            case 0:
+                                if (!(credentials === null || credentials === void 0 ? void 0 : credentials.email) || !(credentials === null || credentials === void 0 ? void 0 : credentials.otp) || !(credentials === null || credentials === void 0 ? void 0 : credentials.userId)) {
+                                    console.log('Missing credentials');
+                                    throw new Error('Missing OTP credentials');
+                                }
+                                sqlOtp = "\n          SELECT * FROM otp_codes\n          WHERE user_id = ?\n          AND code = ?\n          AND expires_at > datetime('now')\n          AND used = FALSE\n          LIMIT 1\n        ";
+                                return [4 /*yield*/, dbGet(sqlOtp, [
+                                        credentials.userId,
+                                        credentials.otp,
+                                    ])];
+                            case 1:
+                                result = _a.sent();
+                                console.log('OTP query result:', result);
+                                if (!result) {
+                                    console.log('Invalid OTP or expired');
+                                    throw new Error('Invalid or expired OTP');
+                                }
+                                updateSql = "\n          UPDATE otp_codes\n          SET used = TRUE\n          WHERE id = ?\n        ";
+                                return [4 /*yield*/, dbRun(updateSql, [result.id])];
+                            case 2:
+                                _a.sent();
+                                sqlUser = 'SELECT * FROM users WHERE id = ?';
+                                return [4 /*yield*/, dbGet(sqlUser, [credentials.userId])];
+                            case 3:
+                                user = _a.sent();
+                                console.log('User query result:', user);
+                                if (!user) {
+                                    console.log('User not found');
+                                    throw new Error('User not found');
+                                }
+                                return [2 /*return*/, {
+                                        id: user.id,
+                                        email: user.email,
+                                    }];
                         }
-                        result = db.prepare("\n          SELECT * FROM otp_codes\n          WHERE user_id = ?\n          AND code = ?\n          AND expires_at > datetime('now')\n          AND used = FALSE\n          LIMIT 1\n        ").get(credentials.userId, credentials.otp);
-                        console.log('OTP query result:', result);
-                        if (!result) {
-                            console.log('Invalid OTP or expired');
-                            throw new Error("Invalid or expired OTP");
-                        }
-                        db.prepare("\n          UPDATE otp_codes\n          SET used = TRUE\n          WHERE id = ?\n        ").run(result.id);
-                        user = db.prepare('SELECT * FROM users WHERE id = ?')
-                            .get(credentials.userId);
-                        console.log('User query result:', user);
-                        if (!user) {
-                            console.log('User not found');
-                            throw new Error("User not found");
-                        }
-                        return [2 /*return*/, {
-                                id: user.id,
-                                email: user.email,
-                            }];
                     });
                 });
             },
@@ -122,7 +136,7 @@ var handler = NextAuth({
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
-                                console.log("Authorizing with LDAP credentials:", credentials);
+                                // console.log("Authorizing with LDAP credentials:", credentials);
                                 if (!(credentials === null || credentials === void 0 ? void 0 : credentials.username) || !(credentials === null || credentials === void 0 ? void 0 : credentials.password)) {
                                     console.log("Missing LDAP credentials");
                                     throw new Error("Missing LDAP credentials");
@@ -131,11 +145,11 @@ var handler = NextAuth({
                                 userDn = "uid=".concat(credentials.username, ",").concat(process.env.LDAP_USER_DN || "ou=people,dc=example,dc=ai");
                                 client = ldap.createClient({
                                     url: ldapUrl,
-                                    timeout: 30000, // 30 seconds timeout
-                                    connectTimeout: 30000, // 30 seconds connect timeout
+                                    timeout: 30000,
+                                    connectTimeout: 30000,
                                     reconnect: {
-                                        initialDelay: 1000, // 1 second initial delay
-                                        maxDelay: 10000, // 10 seconds maximum delay
+                                        initialDelay: 1000,
+                                        maxDelay: 10000,
                                         failAfter: 10 // fail after 10 retries
                                     }
                                 });
@@ -207,9 +221,9 @@ var handler = NextAuth({
     ],
     callbacks: {
         signIn: function (_a) {
-            return __awaiter(this, arguments, void 0, function (_b) {
-                var user = _b.user, account = _b.account, profile = _b.profile;
-                return __generator(this, function (_c) {
+            var user = _a.user, account = _a.account, profile = _a.profile;
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_b) {
                     if ((account === null || account === void 0 ? void 0 : account.provider) === "verify-otp" || (account === null || account === void 0 ? void 0 : account.provider) === "ldap") {
                         console.log("".concat(account.provider, " provider detected; proceeding without profile check."));
                         return [2 /*return*/, true];
@@ -238,9 +252,9 @@ var handler = NextAuth({
             });
         },
         jwt: function (_a) {
-            return __awaiter(this, arguments, void 0, function (_b) {
-                var token = _b.token, user = _b.user, account = _b.account;
-                return __generator(this, function (_c) {
+            var token = _a.token, user = _a.user, account = _a.account;
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_b) {
                     console.log("JWT callback invoked");
                     console.log("Initial token:", token);
                     if (user) {
@@ -258,9 +272,9 @@ var handler = NextAuth({
             });
         },
         session: function (_a) {
-            return __awaiter(this, arguments, void 0, function (_b) {
-                var session = _b.session, token = _b.token;
-                return __generator(this, function (_c) {
+            var session = _a.session, token = _a.token;
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_b) {
                     console.log("Session callback invoked");
                     console.log("Token in session callback:", token);
                     if (token && session.user) {
